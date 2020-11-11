@@ -12,6 +12,8 @@ Simple application to monitor sACN universes.
 
 ## Usage
 
+Monitored universes are define with UNIVERSES in monitor.py
+
 ```bash
 $ git clone https://github.com/mikacousin/sacn_monitor.git
 $ cd sacn_monitor

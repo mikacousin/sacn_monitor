@@ -58,15 +58,15 @@ class Application(Gtk.Application):
         Gtk.Application.do_startup(self)
 
 
-# sACN universes monitored (1-63999)
+# sACN monitored universes (1-63999)
 UNIVERSES = [1, 2, 4]
 
 app_monitor = Application()
 receiver = sacn.sACNreceiver()
 receiver.start()
-for univ in UNIVERSES:
-    receiver.join_multicast(univ)
-    receiver.register_listener("universe", callback, universe=univ)
+for universe in UNIVERSES:
+    receiver.join_multicast(universe)
+    receiver.register_listener("universe", callback, universe=universe)
 
 exit_status = app_monitor.run(sys.argv)
 receiver.stop()
