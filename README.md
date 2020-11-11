@@ -2,6 +2,8 @@
 
 Simple application to monitor sACN universes.
 
+![Screenshot](../assets/sacn_monitor.png?raw=true)
+
 ## Depends on
 
 - python3
