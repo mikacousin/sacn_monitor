@@ -73,7 +73,7 @@ class OutputWidget(Gtk.Misc):
             "Cantarell Regular", cairo.FontSlant.NORMAL, cairo.FontWeight.BOLD
         )
         cr.set_font_size(8 * self.scale)
-        text = f"{self.output}.{self.universe}"
+        text = f"{self.output}"
         (_x, _y, width, height, _dx, _dy) = cr.text_extents(text)
         cr.move_to(
             allocation.width / 2 - width / 2, allocation.height / 4 - (height - 20) / 4
