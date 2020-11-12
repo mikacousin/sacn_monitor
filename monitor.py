@@ -12,9 +12,12 @@ from widgets_output import OutputWidget  # noqa:E402
 def callback(packet):
     """Callback function to update outputs levels"""
     for output, level in enumerate(packet.dmxData):
-        univ = packet.universe
-        app_monitor.win.outputs[univ, output].level = level
-        GLib.idle_add(app_monitor.win.outputs[univ, output].queue_draw)
+        try:
+            univ = packet.universe
+            app_monitor.win.outputs[univ, output].level = level
+            GLib.idle_add(app_monitor.win.outputs[univ, output].queue_draw)
+        except AttributeError:
+            pass
 
 
 class Window(Gtk.ApplicationWindow):
