@@ -12,6 +12,7 @@
 
 """sACN monitor"""
 
+import os
 import sys
 import gi
 import sacn
@@ -19,6 +20,10 @@ import sacn
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib  # noqa:E402
 from widgets_output import OutputWidget  # noqa:E402
+
+if "SACN_MONITOR_TRACE" in os.environ:
+    from pycallgraph import PyCallGraph
+    from pycallgraph.output import GraphvizOutput
 
 
 def callback(packet):
@@ -85,6 +90,14 @@ for universe in UNIVERSES:
     receiver.join_multicast(universe)
     receiver.register_listener("universe", callback, universe=universe)
 
-exit_status = app_monitor.run(sys.argv)
-receiver.stop()
-sys.exit(exit_status)
+if "SACN_MONITOR_TRACE" in os.environ:
+    graphviz = GraphvizOutput()
+    graphviz.output_file = 'sacn_monitor.png'
+    with PyCallGraph(output=graphviz):
+        exit_status = app_monitor.run(sys.argv)
+        receiver.stop()
+        sys.exit(exit_status)
+else:
+    exit_status = app_monitor.run(sys.argv)
+    receiver.stop()
+    sys.exit(exit_status)
