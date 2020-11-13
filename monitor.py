@@ -92,7 +92,7 @@ for universe in UNIVERSES:
 
 if "SACN_MONITOR_TRACE" in os.environ:
     graphviz = GraphvizOutput()
-    graphviz.output_file = 'sacn_monitor.png'
+    graphviz.output_file = "sacn_monitor.png"
     with PyCallGraph(output=graphviz):
         exit_status = app_monitor.run(sys.argv)
         receiver.stop()
