@@ -37,7 +37,7 @@ def callback(packet):
 
 
 class Window(Gtk.ApplicationWindow):
-    """Window with monitored universe
+    """Window with monitored universes
 
     Attributes:
         flowbox (list[Gtk.FlowBox]): One flowbox by monitored universe
