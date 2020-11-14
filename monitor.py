@@ -19,24 +19,30 @@ import gi
 import sacn
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, GLib  # noqa:E402
+from gi.repository import Gio, GLib, Gtk  # noqa:E402
 from widgets_output import OutputWidget  # noqa:E402
+
+App = Gio.Application.get_default
 
 
 def callback(packet):
     """Callback function to update outputs levels"""
-    global app_monitor
     for output, level in enumerate(packet.dmxData):
         try:
             univ = packet.universe
-            app_monitor.win.outputs[univ, output].level = level
-            GLib.idle_add(app_monitor.win.outputs[univ, output].queue_draw)
+            App().win.outputs[univ, output].level = level
+            GLib.idle_add(App().win.outputs[univ, output].queue_draw)
         except AttributeError:
             pass
 
 
 class Window(Gtk.ApplicationWindow):
-    """Window with 512 DMX outputs"""
+    """Window with monitored universe
+
+    Attributes:
+        flowbox (list[Gtk.FlowBox]): One flowbox by monitored universe
+        outputs (dict{int, int}): Output widgets
+    """
 
     def __init__(self, app):
         Gtk.ApplicationWindow.__init__(self, title="sACN monitor", application=app)
@@ -79,7 +85,7 @@ class Application(Gtk.Application):
 
 
 def run_monitor():
-    global app_monitor
+    """Start application"""
     app_monitor = Application()
     receiver = sacn.sACNreceiver()
     receiver.start()
@@ -96,7 +102,6 @@ UNIVERSES = [1, 2, 4]
 run_profile = os.environ.get("SACN_MONITOR_PROFILING", False)
 
 if run_profile:
-    print("Profiling")
     prof = cProfile.Profile()
     res = prof.runcall(run_monitor)
     prof.dump_stats("sacn_monitor-runstats")
