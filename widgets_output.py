@@ -44,7 +44,7 @@ class OutputWidget(Gtk.Misc):
         universe (int): universe (1-63999)
         output (int): output number (1-512)
         level (int): output level (0-255)
-        scale (float):
+        scale (float): zoom value
         width (int): widget width and height
     """
 
@@ -63,7 +63,11 @@ class OutputWidget(Gtk.Misc):
         self.set_size_request(self.width, self.width)
 
     def do_draw(self, cr):
-        """Draw widget"""
+        """Draw widget
+
+        Args:
+            cr (cairo.Context): Used to draw with cairo
+        """
         self.width = 32 * self.scale
         self.set_size_request(self.width, self.width)
         allocation = self.get_allocation()
@@ -79,7 +83,12 @@ class OutputWidget(Gtk.Misc):
         self._draw_output_level(cr, allocation)
 
     def _draw_output_number(self, cr, allocation):
-        """Draw Output number"""
+        """Draw Output number
+
+        Args:
+            cr (cairo.Context): Used to draw with cairo
+            allocation (Gdk.Rectangle): Widget's allocation
+        """
         cr.set_source_rgb(0.9, 0.9, 0.9)
         cr.select_font_face(
             "Cantarell Regular", cairo.FontSlant.NORMAL, cairo.FontWeight.BOLD
@@ -93,7 +102,12 @@ class OutputWidget(Gtk.Misc):
         cr.show_text(text)
 
     def _draw_output_level(self, cr, allocation):
-        """Draw Output level"""
+        """Draw Output level
+
+        Args:
+            cr (cairo.Context): Used to draw with cairo
+            allocation (Gdk.Rectangle): Widget's allocation
+        """
         if self.level:
             cr.set_source_rgb(0.7, 0.7, 0.7)
             cr.select_font_face(

@@ -26,7 +26,11 @@ App = Gio.Application.get_default
 
 
 def callback(packet):
-    """Callback function to update outputs levels"""
+    """Callback function to update outputs levels
+
+    Args:
+        packet (sacn.DataPacket): DMX data
+    """
     for output, level in enumerate(packet.dmxData):
         try:
             univ = packet.universe
