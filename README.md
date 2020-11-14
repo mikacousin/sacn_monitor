@@ -23,3 +23,18 @@ $ git clone https://github.com/mikacousin/sacn_monitor.git
 $ cd sacn_monitor
 $ python monitor.py
 ```
+
+## Profiling
+
+Simply set the `SACN_MONITOR_PROFILING` environment variable to 1, like so:
+
+```bash
+$ SACN_MONITOR_PROFILING=1 python monitor.py
+```
+
+A file named `sacn_monitor-runstats` will be created in the current directory, a handy tool to examine it is `gprof2dot.py`. After install it, run:
+
+```bash
+$ gprof2dot -n0 -e0 -f pstats sacn_monitor-runstats | dot -Tsvg -o callgraph.svg
+$ xdg-open callgraph.svg
+```

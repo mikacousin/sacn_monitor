@@ -12,6 +12,7 @@
 
 """sACN monitor"""
 
+import cProfile
 import os
 import sys
 import gi
@@ -21,13 +22,10 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, GLib  # noqa:E402
 from widgets_output import OutputWidget  # noqa:E402
 
-if "SACN_MONITOR_TRACE" in os.environ:
-    from pycallgraph import PyCallGraph
-    from pycallgraph.output import GraphvizOutput
-
 
 def callback(packet):
     """Callback function to update outputs levels"""
+    global app_monitor
     for output, level in enumerate(packet.dmxData):
         try:
             univ = packet.universe
@@ -80,24 +78,27 @@ class Application(Gtk.Application):
         Gtk.Application.do_startup(self)
 
 
+def run_monitor():
+    global app_monitor
+    app_monitor = Application()
+    receiver = sacn.sACNreceiver()
+    receiver.start()
+    for universe in UNIVERSES:
+        receiver.join_multicast(universe)
+        receiver.register_listener("universe", callback, universe=universe)
+    app_monitor.run(sys.argv)
+    receiver.stop()
+
+
 # sACN monitored universes (1-63999)
 UNIVERSES = [1, 2, 4]
 
-app_monitor = Application()
-receiver = sacn.sACNreceiver()
-receiver.start()
-for universe in UNIVERSES:
-    receiver.join_multicast(universe)
-    receiver.register_listener("universe", callback, universe=universe)
+run_profile = os.environ.get("SACN_MONITOR_PROFILING", False)
 
-if "SACN_MONITOR_TRACE" in os.environ:
-    graphviz = GraphvizOutput()
-    graphviz.output_file = "sacn_monitor.png"
-    with PyCallGraph(output=graphviz):
-        exit_status = app_monitor.run(sys.argv)
-        receiver.stop()
-        sys.exit(exit_status)
+if run_profile:
+    print("Profiling")
+    prof = cProfile.Profile()
+    res = prof.runcall(run_monitor)
+    prof.dump_stats("sacn_monitor-runstats")
 else:
-    exit_status = app_monitor.run(sys.argv)
-    receiver.stop()
-    sys.exit(exit_status)
+    run_monitor()
