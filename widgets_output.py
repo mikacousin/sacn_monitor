@@ -13,20 +13,20 @@
 """Output Widget"""
 
 import math
+from typing import Optional, Tuple
 import cairo
-import gi
-
-gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk  # noqa:E402
+from gi.repository import Gtk
 
 
-def rounded_rectangle_fill(cr, area, radius):
+def rounded_rectangle_fill(
+    cr: cairo.Context, area: Tuple[int, int, int, int], radius: int
+):
     """Draw a filled rounded box
 
     Args:
-        cr: cairo context
-        area: coordinates (top, bottom, left, right)
-        radius: arc's radius
+        cr: Cairo context
+        area: Coordinates (top, bottom, left, right)
+        radius: Arc's radius
     """
     a, b, c, d = area
     cr.arc(a + radius, c + radius, radius, 2 * (math.pi / 2), 3 * (math.pi / 2))
@@ -37,87 +37,92 @@ def rounded_rectangle_fill(cr, area, radius):
     cr.fill()
 
 
-class OutputWidget(Gtk.Misc):
+class OutputWidget(Gtk.DrawingArea):
     """Output widget
 
     Attributes:
-        universe (int): universe (1-63999)
-        output (int): output number (1-512)
-        level (int): output level (0-255)
-        scale (float): zoom value
-        width (int): widget width and height
+        universe: Universe number (1-63999)
+        output: Output number (1-512)
+        level: Output level (0-255)
     """
+
+    universe: int
+    output: int
+    level: int
 
     __gtype_name__ = "OutputWidget"
 
     def __init__(self, universe, output):
-
-        Gtk.Misc.__init__(self)
+        super().__init__()
 
         self.universe = universe
         self.output = output
         self.level = 0
 
-        self.scale = 1.0
-        self.width = 32 * self.scale
-        self.set_size_request(self.width, self.width)
+        self.set_size_request(32, 32)
+        self.set_draw_func(self.draw, None)
 
-    def do_draw(self, cr):
+    def draw(
+        self,
+        area: Gtk.DrawingArea,
+        cr: cairo.Context,
+        w: int,
+        h: int,
+        _data: Optional[object],
+    ) -> None:
         """Draw widget
 
         Args:
-            cr (cairo.Context): Used to draw with cairo
+            area: The Gtk.DrawingArea to redraw
+            cr: Cairo context to draw to
+            w: The actual width of the contents
+            h: The actual height of the contents
+            _data: User data
         """
-        self.width = 32 * self.scale
-        self.set_size_request(self.width, self.width)
-        allocation = self.get_allocation()
         # Draw background
-        area = (1, allocation.width - 2, 1, allocation.height - 2)
+        area = (1, w - 2, 1, h - 2)
         cr.set_source_rgb(
             0.3 + (0.2 / 255 * self.level), 0.3, 0.3 - (0.3 / 255 * self.level)
         )
         rounded_rectangle_fill(cr, area, 5)
         # Draw output number
-        self._draw_output_number(cr, allocation)
+        self.draw_output_number(cr, w, h)
         # Draw Output level
-        self._draw_output_level(cr, allocation)
+        self.draw_output_level(cr, w, h)
 
-    def _draw_output_number(self, cr, allocation):
+    def draw_output_number(self, cr: cairo.Context, w: int, h: int) -> None:
         """Draw Output number
 
         Args:
-            cr (cairo.Context): Used to draw with cairo
-            allocation (Gdk.Rectangle): Widget's allocation
+            cr: Used to draw with cairo
+            w: width
+            h: height
         """
         cr.set_source_rgb(0.9, 0.9, 0.9)
         cr.select_font_face(
             "Cantarell Regular", cairo.FontSlant.NORMAL, cairo.FontWeight.BOLD
         )
-        cr.set_font_size(8 * self.scale)
+        cr.set_font_size(8)
         text = f"{self.output}"
         (_x, _y, width, height, _dx, _dy) = cr.text_extents(text)
-        cr.move_to(
-            allocation.width / 2 - width / 2, allocation.height / 4 - (height - 20) / 4
-        )
+        cr.move_to(w / 2 - width / 2, h / 4 - (height - 20) / 4)
         cr.show_text(text)
 
-    def _draw_output_level(self, cr, allocation):
+    def draw_output_level(self, cr: cairo.Context, w: int, h: int) -> None:
         """Draw Output level
 
         Args:
-            cr (cairo.Context): Used to draw with cairo
-            allocation (Gdk.Rectangle): Widget's allocation
+            cr: Used to draw with cairo
+            w: width
+            h: height
         """
         if self.level:
             cr.set_source_rgb(0.7, 0.7, 0.7)
             cr.select_font_face(
                 "Cantarell Bold", cairo.FontSlant.NORMAL, cairo.FontWeight.BOLD
             )
-            cr.set_font_size(8 * self.scale)
+            cr.set_font_size(8)
             text = str(self.level)
             (_x, _y, width, height, _dx, _dy) = cr.text_extents(text)
-            cr.move_to(
-                allocation.width / 2 - width / 2,
-                allocation.height / 2 - (height - 20) / 2,
-            )
+            cr.move_to(w / 2 - width / 2, h / 2 - (height - 20) / 2)
             cr.show_text(text)
